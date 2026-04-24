@@ -21,7 +21,7 @@ Load on demand when you reach the matching step.
 - Tool reads user-owned data, computes something, shows a dashboard.
 - No accounts, sync service, or per-user database.
 - Deployable as a single static bundle to any CDN.
-- You want the same core to serve future targets (Tauri desktop, Nextcloud, Obsidian plugin).
+- You want the same `shared` package to serve future targets (Tauri desktop, Nextcloud, Obsidian plugin).
 
 ## Complexity budget
 
@@ -29,7 +29,7 @@ Spend complexity only where it shows up in the product:
 
 1. **Style guide / design tokens.** One careful palette and typography pass early pays for itself across every screen.
 2. **Data processing.** Parsing, schema validation, file I/O.
-3. **Computations.** The domain engine (amortization, forecasting, whatever the app actually does).
+3. **Computations.** The domain engine (amortization, forecasting, whatever the app does).
 4. **Rendering.** Chart math, layout logic, interaction details.
 
 Everything else, use off-the-shelf and keep it boring: pnpm + Vite + Vitest + ESLint + Prettier + Stylelint. Don't reinvent bundlers, custom CSS-in-JS runtimes, or state containers.
@@ -62,24 +62,24 @@ project/
   lefthook.yml          # pre-commit + pre-push hooks
   README.md
   packages/
-    core/               # pure TS: types, schemas, engine, parsing. No DOM.
+    shared/             # pure TS: types, schemas, engine, parsing. No DOM.
     web/                # React app (the shipping target)
     desktop/            # optional: Tauri wrapper (src-tauri + deps)
 ```
 
-## The `core` package is sacred
+## The `shared` package is sacred
 
-- No DOM references. Grep `window\.|document\.|localStorage|navigator\.` in `packages/core/src` and it must return nothing.
+- No DOM references. Grep `window\.|document\.|localStorage|navigator\.` in `packages/shared/src` and it must return nothing.
 - `types: []` in its tsconfig; don't force Node types onto every consumer. Split a `tsconfig.test.json` with `types: ["node"]` for Node-using tests.
 - Exports the data model, validation (JSON Schema + Ajv), parse/serialize (YAML, CSV), the compute engine(s), and framework-neutral interfaces (e.g. `DataSource`).
-- 100% line coverage on compute code. Hand-verified fixtures as snapshots.
+- 100% line coverage on compute code, with hand-verified fixtures as snapshots.
 
 ## Source abstraction: the key to a second target
 
-The hardest thing to port is storage. Define an interface in core early:
+The hardest thing to port is storage. Define an interface in `shared` early:
 
 ```ts
-// packages/core/src/source/types.ts
+// packages/shared/src/source/types.ts
 export interface DataSource {
   readonly kind: string; // 'demo' | 'fsa' | 'ocs' | ...
   readonly name: string; // UI label
@@ -93,7 +93,7 @@ Implement `DemoSource`, `FsaSource` (File System Access API), and `FallbackSourc
 
 ## Component discipline
 
-Keep `.tsx` files under ~300 lines. When a component grows past 300 it almost always has a natural extraction point (a modal, a form section, an editor row). React's lack of a built-in template block makes JSX components feel longer than Vue SFCs at the same complexity, so the ceiling is tighter.
+Keep `.tsx` files under ~300 lines; past that there's almost always a natural extraction point (a modal, a form section, an editor row). React's lack of a built-in template block makes JSX components feel longer than Vue SFCs at the same complexity, so the ceiling is tighter.
 
 Common split patterns that pay off: `<DataTable>` vs `<RowEditor>`, `<Form>` vs `<FormSection*>`, `<Chart>` vs `<ChartTooltip>` vs pure `*.ts` path builders, custom hooks (`useThing.ts`) for any stateful logic reused more than once or that has its own test surface.
 
@@ -101,7 +101,7 @@ Common split patterns that pay off: `<DataTable>` vs `<RowEditor>`, `<Form>` vs 
 
 If you're writing CSS, default to a single global stylesheet (`styles/app.css`, imported once in `main.tsx`) that holds design tokens, typography, buttons, banners, form fields, and layout helpers. This keeps the style surface small, easy to grep, easy to evolve.
 
-Add a component-local CSS Module (`Component.module.css`) only when the component has a one-off layout that won't recur anywhere else, and when its class names are specific enough that a collision with the global sheet would be annoying (`.row`, `.header`, `.actions`). When two modules start needing the same rule, promote it to the global sheet instead of copying. If you're using Tailwind, the same "write it inline, promote when it repeats" rule applies: a rule that shows up on five buttons becomes a `@apply` utility or a component with the classes baked in.
+Add a component-local CSS Module (`Component.module.css`) only for one-off layouts with class names generic enough that a global-sheet collision would annoy (`.row`, `.header`, `.actions`). When two modules need the same rule, promote it to the global sheet instead of copying. Tailwind follows the same rule: once a class combo repeats on five buttons, extract it into a `@apply` utility or a component.
 
 Avoid CSS-in-JS runtime libraries; they balloon the bundle for no gain in a small app.
 
@@ -132,14 +132,14 @@ Keep a single `tokens.css` as the source of truth, with named colors (e.g. "mari
 }
 ```
 
-Typography: one serif face for headings/numbers with character, one sans for UI, one mono for code/paths. Use `font-feature-settings: 'tnum' 1` for money/amounts so digits align in columns. Load from Google Fonts via a `<link>` in `index.html` above the bundle script, and cap the total at 2–3 families to keep the payload small.
+Typography: one serif face for headings/numbers with character, one sans for UI, one mono for code/paths. Use `font-feature-settings: 'tnum' 1` on money/amounts so digits align in columns. Load from Google Fonts via a `<link>` in `index.html`; cap at 2–3 families.
 
 ## Testing philosophy
 
-- **Core**: exhaustive unit tests. 100% line coverage target. Fixtures committed alongside expected outputs; a round-trip snapshot test catches accidental behavior drift.
-- **Web**: test **Zustand stores** directly (`useThingStore.getState()` and its actions, no mounting needed) and small pure helpers. Test custom hooks with `renderHook` from `@testing-library/react` for a minimal harness. Mount a full component only when you need to assert an interaction that's hard to describe in props (e.g. a sticky header rendering at the right row); use `render` + `screen` + `userEvent`, no shallow rendering. Don't bother with E2E or visual-regression unless prompted.
+- **Shared**: exhaustive unit tests, 100% line coverage. Commit fixtures alongside expected outputs; a round-trip snapshot catches behavior drift.
+- **Web**: test **Zustand stores** directly (`useThingStore.getState()` + actions, no mounting) and pure helpers. Test custom hooks with `renderHook` from `@testing-library/react`. Mount a full component only when asserting an interaction that's hard to describe in props (e.g. a sticky header landing on the right row); use `render` + `screen` + `userEvent`, never shallow. Skip E2E and visual-regression unless prompted.
 - **One smoke test per component file** catches import breaks and basic render failures cheaply.
-- When a bug is fixed, add the failing test first so it can't regress.
+- When fixing a bug, add the failing test first so it can't regress.
 
 ## README structure
 
@@ -161,7 +161,7 @@ Keep it short and complete.
 1. `pnpm init` root + `pnpm-workspace.yaml`. Pin `packageManager`.
 2. `tsconfig.base.json` with strict options.
 3. Root `.editorconfig`, `.prettierrc`, `eslint.config.js`, `.stylelintrc.cjs`, `.prettierignore` (with `.pnpm-store`). See `references/tooling.md`.
-4. `packages/core` with types, schemas, engine, tests. No DOM.
+4. `packages/shared` with types, schemas, engine, tests. No DOM.
 5. `packages/web` with Vite + React + Zustand, one global `styles/app.css` (tokens + base) or Tailwind, `main.tsx`, `App.tsx`, one component, one Zustand store, one test.
 6. `Makefile` + root scripts. See `references/tooling.md`.
 7. `lefthook.yml` + `make install-hooks`. See `references/tooling.md`.
@@ -175,7 +175,7 @@ Keep it short and complete.
 
 ## Anti-patterns to avoid
 
-- Skipping the core/target split and putting everything in one package.
+- Skipping the shared/target split and putting everything in one package.
 - Inlining CSS in files for rules that apply elsewhere.
 - Letting the store couple directly to FSA, fetch, or `localStorage`. Always go through an interface.
 - Committing the pnpm store. Add `.pnpm-store` to both `.gitignore` and `.prettierignore`.

@@ -5,7 +5,7 @@ description: Build self-contained HTML presentation decks with the <deck-stage> 
 
 # HTML deck
 
-Single-file decks built on a custom element (`<deck-stage>`) shipped with this skill. You author one HTML file. The element handles navigation, scaling, print, and persistence. Output is a portable folder that opens locally, deploys to any static host, and prints cleanly to PDF.
+Single-file decks built on the `<deck-stage>` custom element shipped with this skill. You author one HTML file; the element handles navigation, scaling, print, and persistence. Output is a portable folder that opens locally, deploys to any static host, and prints cleanly to PDF.
 
 ## Files shipped with this skill
 
@@ -15,16 +15,16 @@ Single-file decks built on a custom element (`<deck-stage>`) shipped with this s
 
 ## Inputs to ask for before authoring
 
-This skill does not invent aesthetics. Before writing any slide, get three things from the user. If any are missing, ask. A guessed aesthetic is almost always generic.
+This skill does not invent aesthetics. Before writing any slide, get three things from the user (ask if any are missing — a guessed aesthetic reads as generic):
 
 - **Feel / register.** One sentence: technical, editorial, corporate, minimalist, playful, academic, etc.
-- **Color palette.** Either explicit hex values or a description concrete enough to translate ("dark, warm, one amber accent"). One dominant color at 60–70% visual weight, one or two supporting tones, one sharp accent.
+- **Color palette.** Explicit hex values or a description concrete enough to translate ("dark, warm, one amber accent"). One dominant color at 60–70% visual weight, one or two supporting tones, one sharp accent.
 - **Typography direction.** Serif or sans, display or utilitarian. If the user has no opinion, pick one pairing and commit.
 
 ## Workflow
 
 1. **Draft in markdown first.** One section per slide. Annotate structure and emphasis inline (e.g. `[cover]`, `[3-col]`, `[dark]`, `[pull-quote]`, `**key phrase**`). Do not write HTML yet.
-2. **Review the markdown as a deck.** Spot commonalities: if five slides are "title + three columns," they share a layout. If two are "big quote + attribution," same. Note which slides deserve a contrasting background to draw attention, and keep that list short.
+2. **Review the markdown as a deck.** Spot commonalities: five "title + three columns" slides share a layout; two "big quote + attribution" slides do too. Note which slides deserve a contrasting background for emphasis, and keep that list short.
 3. **Translate to HTML.** Build the shared chassis first (palette, type scale, chrome, common layouts as CSS classes). Then instantiate each slide against those classes. Do not author slides in isolation.
 4. **Preview and iterate.** See "Preview and export" below.
 
@@ -85,7 +85,7 @@ Universal rules that apply to any deck, regardless of feel:
 ## Assets
 
 - **Fonts: Google Fonts.** Link from `fonts.googleapis.com` in the `<head>`. Limit to 2–3 families total (display, body, mono). The example deck pairs Instrument Serif + IBM Plex Sans + JetBrains Mono.
-- **Icons: FontAwesome, inlined as SVG.** Do not link the full FontAwesome CSS or JS bundle; it ships icons you won't use and adds a network dependency for the exported HTML. Grab the raw SVG for each icon you need from the FontAwesome site and inline it, either pasted at the use site or (preferred when the same icon recurs) as a `<symbol>` in a hidden sprite at the top of `<body>`:
+- **Icons: FontAwesome, inlined as SVG.** Don't link the full FontAwesome bundle; it ships icons you won't use and adds a network dep to the exported HTML. Grab each icon's raw SVG from the FontAwesome site and either paste it at the use site or, when the icon recurs, put it in a `<symbol>` sprite at the top of `<body>`:
 
   ```html
   <svg style="display:none" aria-hidden="true">

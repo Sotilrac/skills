@@ -31,25 +31,21 @@ paths: "**/*.d2"
 - Install: `curl -fsSL https://d2lang.com/install-tala.sh | sh -s --`
 
 ## What Does NOT Affect Layout (verified)
-- Node definition order in the file
-- Connection definition order in the file
-- These have zero effect on ELK layout - do not waste time reordering
-- Connection direction: `A -> B` puts A in an earlier layer than B
+- Node and connection definition order in the file have zero effect on ELK layout - don't waste time reordering.
 
 ## What DOES Affect Layout
-- **Container hierarchy**: the most reliable grouping mechanism
-- **Global `direction`**: `down`, `right`, `left`, `up`
-- **`width`/`height` on containers** (ELK only): constrains container size
-- **Grid layout** (`grid-rows`/`grid-columns`): forces structured placement but bypasses routing
-- **Avoid layout manual control**: strive for correctness, layout is minimally configurable.
+- **Container hierarchy**: the most reliable grouping mechanism.
+- **Global `direction`**: `down`, `right`, `left`, `up`.
+- **`width`/`height` on containers** (ELK only): constrains container size.
+- **Grid layout** (`grid-rows`/`grid-columns`): forces structured placement but bypasses routing.
+
+Layout is minimally configurable; aim for correctness rather than manual positioning.
 
 ## `near` Keyword - Critical Pitfall
-- Shapes with `near` (e.g., `near: top-center`) are REMOVED from the layout graph before the engine runs
-- You CANNOT connect objects from within a `near`-positioned container to objects outside it
-- This causes broken/scattered layouts or errors
-- Use `near` ONLY for detached elements: titles, legends, annotations
-- Valid constants: `top-left`, `top-center`, `top-right`, `center-left`, `center-right`, `bottom-left`, `bottom-center`, `bottom-right`
-- `near: OtherObject` only works with TALA
+- Shapes with `near` (e.g. `near: top-center`) are REMOVED from the layout graph before the engine runs, so you cannot connect objects inside a `near`-positioned container to objects outside it — attempts cause broken or scattered layouts.
+- Use `near` ONLY for detached elements: titles, legends, annotations.
+- Valid constants: `top-left`, `top-center`, `top-right`, `center-left`, `center-right`, `bottom-left`, `bottom-center`, `bottom-right`.
+- `near: OtherObject` only works with TALA.
 
 ## Grid Layout
 - `grid-columns` and `grid-rows` bypass the layout engine entirely
@@ -105,7 +101,9 @@ paths: "**/*.d2"
 - `border-radius` on connections controls corner roundness (only applies to engines with elbow routing like ELK)
 
 ## D2 Config Vars
-Always use at the top
+
+Always at the top of the file:
+
 ```d2
 vars: {
     d2-config: {
@@ -114,7 +112,8 @@ vars: {
     }
 }
 ```
-ELK spacing flags are CLI-only - they cannot be set in d2-config.
+
+ELK spacing flags are CLI-only and cannot be set in d2-config.
 
 ## Common Patterns
 

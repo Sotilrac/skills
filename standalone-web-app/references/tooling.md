@@ -6,7 +6,7 @@ Referenced from `SKILL.md`. Read when setting up the stack, writing lint configs
 
 - **Build**: Vite + `@vitejs/plugin-react`. Target `es2023`, `base: './'` so the bundle works at any subpath.
 - **TypeScript**: strict. Turn on `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, `verbatimModuleSyntax`.
-- **Testing**: Vitest + `@testing-library/react` + `@testing-library/user-event`. `jsdom` environment for component tests, plain Node for core tests.
+- **Testing**: Vitest + `@testing-library/react` + `@testing-library/user-event`. `jsdom` environment for component tests, plain Node for `shared` tests.
 - **State**: Zustand for shared state (one store per domain). `useState` / `useReducer` for local, `useContext` for narrow read-mostly injection.
 - **Validation**: Zod. Pairs with TypeScript so your parsed data is typed end-to-end; works for request/response schemas and domain-model validation. Reach for Ajv + JSON Schema only when the schema has to round-trip as JSON (e.g. for external consumers).
 - **Date handling**: `date-fns` for formatting and math. Don't hand-roll `new Date()` arithmetic; timezone bugs will find you.
@@ -17,7 +17,7 @@ Referenced from `SKILL.md`. Read when setting up the stack, writing lint configs
 
   Avoid CSS-in-JS runtime libraries either way; they balloon the bundle for no gain in a small app.
 - **Package manager**: pnpm with workspaces. `packageManager` pinned in root `package.json` for Corepack.
-- **Icons**: FontAwesome, inlined as SVG. Copy the raw SVG for each icon you need from fontawesome.com into a small `src/icons.tsx` module that exports each as a named React component (e.g. `<IconCheck />`, `<IconAlert />`). This ships only the icons the app uses; no tree-shake gymnastics, no runtime icon lookup. Pick one FontAwesome variant (solid, regular, light, duotone, sharp) and stay in it across the app. If you specifically need a kit with more custom weights, `@phosphor-icons/react` or `lucide-react` are reasonable alternatives, but stick to named imports only.
+- **Icons**: FontAwesome, inlined as SVG. Copy each icon's raw SVG from fontawesome.com into a small `src/icons.tsx` module that exports each as a named React component (`<IconCheck />`, `<IconAlert />`). Ships only the icons the app uses; no tree-shake gymnastics, no runtime lookup. Pick one FontAwesome variant (solid, regular, light, duotone, sharp) and stay in it across the app.
 - **Component kits**: for React, **shadcn/ui** is the default worth trying. It's not a package, it's a copy-in-your-repo set of Radix-based primitives styled with Tailwind; you own the code and can customize freely. If you're hand-writing CSS, skip it and build your own small primitives as you need them.
 - **Charts**: use off-the-shelf charts as much as practical. Hand-rolled SVG is fine for small single-chart dashboards (write scale + tick helpers in a `scale.ts` util, and keep the path math out of the component).
 
