@@ -54,16 +54,17 @@ project/
   package.json          # root scripts, dev deps, format/lint config
   Makefile              # developer commands
   .gitlab-ci.yml        # or .github/workflows/
+  .gitignore
   tsconfig.base.json
   .editorconfig
   .prettierrc / eslint.config.js / .stylelintrc.cjs
+  .prettierignore
   lefthook.yml          # pre-commit + pre-push hooks
   README.md
   packages/
     core/               # pure TS: types, schemas, engine, parsing. No DOM.
     web/                # React app (the shipping target)
     desktop/            # optional: Tauri wrapper (src-tauri + deps)
-    <target>/           # other future targets (Nextcloud, Obsidian, ...)
 ```
 
 ## The `core` package is sacred
@@ -71,7 +72,7 @@ project/
 - No DOM references. Grep `window\.|document\.|localStorage|navigator\.` in `packages/core/src` and it must return nothing.
 - `types: []` in its tsconfig; don't force Node types onto every consumer. Split a `tsconfig.test.json` with `types: ["node"]` for Node-using tests.
 - Exports the data model, validation (JSON Schema + Ajv), parse/serialize (YAML, CSV), the compute engine(s), and framework-neutral interfaces (e.g. `DataSource`).
-- 100% line coverage on pure compute code. Hand-verified fixtures as snapshots.
+- 100% line coverage on compute code. Hand-verified fixtures as snapshots.
 
 ## Source abstraction: the key to a second target
 
