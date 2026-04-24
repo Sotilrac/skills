@@ -8,7 +8,7 @@ paths: "**/*.d2"
 
 ## Layout Engines
 
-### ELK (recommended for complex diagrams)
+### ELK (recommended)
 - Set in file: `vars: { d2-config: { layout-engine: elk } }`
 - Only engine that respects `width`/`height` on containers
 - Per-container `direction` is silently ignored - only global direction works
@@ -25,7 +25,7 @@ paths: "**/*.d2"
 - Known bug: nested nodes can overflow parent container boundaries
 - Faster than ELK
 
-### TALA (proprietary, separate install)
+### TALA (not recommended, proprietary, separate install)
 - Only engine that supports per-container `direction` and `near: OtherObject`
 - Can crash (signal: killed) on complex diagrams with many edges
 - Install: `curl -fsSL https://d2lang.com/install-tala.sh | sh -s --`
@@ -34,13 +34,14 @@ paths: "**/*.d2"
 - Node definition order in the file
 - Connection definition order in the file
 - These have zero effect on ELK layout - do not waste time reordering
+- Connection direction: `A -> B` puts A in an earlier layer than B
 
 ## What DOES Affect Layout
-- **Connection direction**: `A -> B` puts A in an earlier layer than B
 - **Container hierarchy**: the most reliable grouping mechanism
 - **Global `direction`**: `down`, `right`, `left`, `up`
 - **`width`/`height` on containers** (ELK only): constrains container size
 - **Grid layout** (`grid-rows`/`grid-columns`): forces structured placement but bypasses routing
+- **Avoid layout manual control**: strive for correctness, layout is minimally configurable.
 
 ## `near` Keyword - Critical Pitfall
 - Shapes with `near` (e.g., `near: top-center`) are REMOVED from the layout graph before the engine runs
@@ -104,6 +105,7 @@ paths: "**/*.d2"
 - `border-radius` on connections controls corner roundness (only applies to engines with elbow routing like ELK)
 
 ## D2 Config Vars
+Always use at the top
 ```d2
 vars: {
     d2-config: {
@@ -146,8 +148,8 @@ legend: Legend {
 ### Rendering commands
 ```bash
 # Live preview
-d2 --elk-nodeNodeBetweenLayers 0 --elk-edgeNodeBetweenLayers 10 --watch src/file.d2 src/file.svg
+d2 --watch src/file.d2 src/file.svg
 
 # Render to PNG
-d2 --elk-nodeNodeBetweenLayers 0 --elk-edgeNodeBetweenLayers 10 src/file.d2 src/file.png
+d2 src/file.d2 src/file.png
 ```
