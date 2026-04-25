@@ -67,6 +67,26 @@ project/
     desktop/            # optional: Tauri wrapper (src-tauri + deps)
 ```
 
+## Version and author: single source of truth
+
+Track the app's `version` and `author` in the **root `package.json`** only. Not in each workspace package, not duplicated as a footer string, not hardcoded in the README. Other workspace packages keep `"version": "0.0.0"` or omit `version`. Bump with `pnpm version patch` from the root.
+
+Expose them to the bundle via Vite's `define` so they're inlined at build time:
+
+```ts
+// packages/web/vite.config.ts
+import pkg from '../../package.json' with { type: 'json' };
+
+export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+    __APP_AUTHOR__: JSON.stringify(pkg.author),
+  },
+});
+```
+
+Declare them globally in `src/global.d.ts` (`declare const __APP_VERSION__: string;`) and reference them anywhere the UI needs them: footer, About dialog, `llms.txt` template, error reports.
+
 ## The `shared` package is sacred
 
 - No DOM references. Grep `window\.|document\.|localStorage|navigator\.` in `packages/shared/src` and it must return nothing.
@@ -158,7 +178,7 @@ Keep it short and complete.
 
 ## Checklist for a new repo
 
-1. `pnpm init` root + `pnpm-workspace.yaml`. Pin `packageManager`.
+1. `pnpm init` root + `pnpm-workspace.yaml`. Pin `packageManager`. Set `version` and `author` here, not in workspace packages.
 2. `tsconfig.base.json` with strict options.
 3. Root `.editorconfig`, `.prettierrc`, `eslint.config.js`, `.stylelintrc.cjs`, `.prettierignore` (with `.pnpm-store`). See `references/tooling.md`.
 4. `packages/shared` with types, schemas, engine, tests. No DOM.
