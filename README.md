@@ -71,4 +71,4 @@ Drop a new `<name>/SKILL.md` at the repo root, add a row to the table above, and
 
 ## License
 
-[MIT](LICENSE).
+[MPL-2.0](LICENSE).
