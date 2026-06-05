@@ -8,15 +8,17 @@ The repo layout mirrors `~/.claude/skills/` exactly: one folder per skill, each 
 
 | Skill | When it triggers |
 | :--- | :--- |
-| [d2](d2/SKILL.md) | Writing, debugging, or explaining [D2](https://d2lang.com) diagrams. Auto-loads on `**/*.d2`. |
+| [d2-diagrams](d2-diagrams/SKILL.md) | Writing, debugging, or explaining [D2](https://d2lang.com) diagrams. Auto-loads on `**/*.d2`. |
 | [html-deck](html-deck/SKILL.md) | Authoring single-file HTML presentation decks (keyboard nav, auto-scale, print-to-PDF, speaker notes). Ships with a runtime, a template, and a worked example. |
+| [nextcloud-web-app](nextcloud-web-app/SKILL.md) | Adding a Nextcloud app target to a local-first web app and publishing it to the Nextcloud App Store. Pairs with standalone-web-app. |
 | [standalone-web-app](standalone-web-app/SKILL.md) | Bootstrapping a local-first, single-bundle browser app (pnpm + Vite + React + TS). |
+| [ticket](ticket/SKILL.md) | Working a Jira ticket end-to-end via Atlassian MCP: plan, branch, implement, commit, PR. Invoke as `/ticket AM-272`. |
 
 ## Install
 
 ```bash
 ./install.sh              # install every skill
-./install.sh d2 html-deck # install specific skills
+./install.sh d2-diagrams html-deck # install specific skills
 ./install.sh --list       # list available skills and which are currently installed
 ./install.sh --project    # install into ./.claude/skills (this repo only) instead of ~/.claude/skills
 ./install.sh --link       # symlink instead of copy, so edits here are live
