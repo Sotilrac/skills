@@ -31,7 +31,7 @@ Check `git rev-parse --abbrev-ref HEAD`.
   git checkout -b <KEY>
   ```
 
-Never branch off `main`. The PR target is `develop` unless instructed otehrwise or the repo simply has no `develop`.
+Never branch off `main`. The PR target is `develop` unless instructed otherwise or the repo simply has no `develop`.
 
 ## Step 3: Plan in plan mode
 
@@ -49,7 +49,7 @@ Surface loose ends in the plan rather than letting them surface at PR time. `Exi
 
 Work the plan in small, logically grouped commits.
 
-- Commit subject: `[<KEY>] <short summary>` (e.g. `[ABC-123] Ads parameters for memory configuration`).
+- Commit subject: `[<KEY>] <short summary>` (e.g. `[ABC-123] Adds parameters for memory configuration`).
 - No `Co-Authored-By` trailer. No "Generated with Claude Code" footer.
 - Run pre-commit before each commit: `pre-commit run --files <changed paths>`, or `pre-commit run --all-files` for cross-cutting changes. Re-run until clean.
 - Run the relevant tests / builds for what changed. The repo's PR template points at `README.md` and `docs/operations_guide.md` for build and regression test instructions.

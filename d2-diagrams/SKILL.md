@@ -1,5 +1,5 @@
 ---
-name: d2
+name: d2-diagrams
 description: D2 diagram language reference - layout engines, styling, composition, and pitfalls. Use when writing, debugging, or explaining D2 diagrams.
 paths: "**/*.d2"
 ---

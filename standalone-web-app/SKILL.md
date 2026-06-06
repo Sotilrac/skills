@@ -1,6 +1,6 @@
 ---
 name: standalone-web-app
-description: Build and ship a local-first standalone web app: monorepo, stack picks, component discipline, theming, analytics, CI, deploy. Use to bootstrap a new data-centric tool that runs entirely in the browser.
+description: Build and ship a local-first standalone web app: monorepo, stack picks, component discipline, theming, analytics, CI, deploy. Use when bootstrapping any data-centric tool that runs in the browser (dashboard, calculator, tracker, visualizer), even if the user doesn't say "local-first" or "static". Also use when starting a new web project with no stated backend requirement.
 ---
 
 # Standalone web app
