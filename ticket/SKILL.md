@@ -1,15 +1,15 @@
 ---
 name: ticket
-description: Work a Jira ticket end-to-end. Fetch the ticket via Atlassian MCP, plan with the user, branch from develop, implement with repo tooling, commit incrementally, and open a PR using the repo template when asked. Invoke as /ticket AM-272.
+description: Work a Jira ticket end-to-end. Fetch the ticket via Atlassian MCP, plan with the user, branch from develop, implement with repo tooling, commit incrementally, and open a PR using the repo template when asked. Invoke as /ticket ABC-123.
 ---
 
 # ticket
 
-Drive a single Jira ticket from "just opened" to "PR up" in one consistent workflow. The user invokes as `/ticket <KEY>` (e.g. `/ticket AM-272`).
+Drive a single Jira ticket from "just opened" to "PR up" in one consistent workflow. The user invokes as `/ticket <KEY>` (e.g. `/ticket ABC-123`).
 
 ## Input
 
-One Jira ticket key, like `AM-272`. If the user invoked without a key, ask for it.
+One Jira ticket key, like `ABC-123`. If the user invoked without a key, ask for it.
 
 ## Step 1: Fetch the ticket
 
@@ -23,7 +23,7 @@ If the fetch fails (bad key, auth), report the error and stop.
 
 Check `git rev-parse --abbrev-ref HEAD`.
 
-- If it already matches the ticket key (e.g. `AM-272` for `AM-272`), keep it.
+- If it already matches the ticket key (e.g. `ABC-123` for `ABC-123`), keep it.
 - Otherwise:
   ```
   git checkout develop
@@ -49,7 +49,7 @@ Surface loose ends in the plan rather than letting them surface at PR time. `Exi
 
 Work the plan in small, logically grouped commits.
 
-- Commit subject: `[<KEY>] <short summary>` (matches existing history, e.g. `[AM-220] Set training mode and power level via USB`).
+- Commit subject: `[<KEY>] <short summary>` (e.g. `[ABC-123] Ads parameters for memory configuration`).
 - No `Co-Authored-By` trailer. No "Generated with Claude Code" footer.
 - Run pre-commit before each commit: `pre-commit run --files <changed paths>`, or `pre-commit run --all-files` for cross-cutting changes. Re-run until clean.
 - Run the relevant tests / builds for what changed. The repo's PR template points at `README.md` and `docs/operations_guide.md` for build and regression test instructions.

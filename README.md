@@ -12,7 +12,7 @@ The repo layout mirrors `~/.claude/skills/` exactly: one folder per skill, each 
 | [html-deck](html-deck/SKILL.md) | Authoring single-file HTML presentation decks (keyboard nav, auto-scale, print-to-PDF, speaker notes). Ships with a runtime, a template, and a worked example. |
 | [nextcloud-web-app](nextcloud-web-app/SKILL.md) | Adding a Nextcloud app target to a local-first web app and publishing it to the Nextcloud App Store. Pairs with standalone-web-app. |
 | [standalone-web-app](standalone-web-app/SKILL.md) | Bootstrapping a local-first, single-bundle browser app (pnpm + Vite + React + TS). |
-| [ticket](ticket/SKILL.md) | Working a Jira ticket end-to-end via Atlassian MCP: plan, branch, implement, commit, PR. Invoke as `/ticket AM-272`. |
+| [ticket](ticket/SKILL.md) | Working a Jira ticket end-to-end via Atlassian MCP: plan, branch, implement, commit, PR. Invoke as `/ticket ABC-123`. |
 
 ## Install
 
