@@ -1,0 +1,26 @@
+{
+  "skill_name": "translate",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "recipe-mx-spanish",
+      "prompt": "I run a small food blog and want to publish my chocolate chip cookie recipe in Spanish for readers in Mexico. Keep the casual voice. Moderate regional flavor is fine, natural Mexican vocabulary but no heavy slang. Save the translation as cookies-es.md.\n\n# The Only Chocolate Chip Cookies I Make Anymore\n\nLook, I've tried a lot of cookie recipes, and I keep coming back to this one. Crispy edges, chewy middle, no chilling required.\n\nYou'll need:\n- 2 1/4 cups all-purpose flour\n- 1 tsp baking soda\n- 1 tsp salt\n- 1 cup (2 sticks) butter, softened\n- 3/4 cup granulated sugar\n- 3/4 cup packed brown sugar\n- 2 large eggs\n- 2 tsp vanilla extract\n- 2 cups chocolate chips\n\nPreheat your oven to 375°F. Whisk the flour, baking soda and salt in a bowl. In another bowl, beat the butter and both sugars until light and fluffy, about 3 minutes. Don't rush this part, it matters. Beat in the eggs one at a time, then the vanilla. Gradually mix in the dry ingredients, then fold in the chocolate chips. Drop rounded tablespoons onto ungreased baking sheets. Bake 9 to 11 minutes, until golden brown. Let them cool on the sheet for a couple of minutes before moving them to a wire rack. They'll firm up as they cool, so don't overbake.",
+      "expected_output": "cookies-es.md in casual Mexican Spanish recipe-blog register: localized units (°C, grams or tazas per MX convention), Mexican vocabulary (e.g. chispas de chocolate, mantequilla), consistent instruction verb form, plus evidence of prior research and a style guide/lexicon.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "eval_name": "cli-docs-french",
+      "prompt": "Translate this README section for our CLI tool into French, for developers in France. Professional technical register, neutral dialect. Save as readme-fr.md.\n\n## Getting started\n\nInstall the CLI globally with npm:\n\n    npm install -g shipfast\n\nThen authenticate with your API token:\n\n    shipfast login --token YOUR_TOKEN\n\nThe token is stored in ~/.config/shipfast/credentials and is never sent anywhere except our API. To deploy your first project, run shipfast deploy from the project root. The CLI reads shipfast.yml for configuration; if the file is missing, it falls back to sensible defaults and prints a warning. Use the --dry-run flag to preview changes without deploying. Deployments are atomic: if any step fails, the previous version stays live. Run shipfast rollback to revert to an earlier release, and shipfast logs --follow to stream production logs in real time.",
+      "expected_output": "readme-fr.md in contemporary French dev-docs register: vous or impersonal forms, correct handling of anglicisms per current French dev usage (deployer vs deploy, token vs jeton), commands and paths untranslated, plus evidence of research into French-language CLI docs.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "eval_name": "marketing-pt-br",
+      "prompt": "translate this landing page copy to portuguese for brazil, it's for our fitness app launch. keep the energetic casual tone, lean into brazilian voice. save as landing-pt.md\n\nMeet your new workout buddy.\n\nFitSpark turns your phone into a personal trainer that actually gets you. No judgment, no $80/month gym membership, no boring routines. Just 20-minute workouts that adapt to your level, your gear (or lack of it), and your schedule.\n\nCrush your goals. Track your streaks. Feel amazing.\n\nTry FitSpark free for 14 days. No credit card required. Cancel anytime, but you won't want to.",
+      "expected_output": "landing-pt.md in energetic Brazilian Portuguese marketing register: você forms, Brazilian fitness-app vocabulary (treino, academia), localized pricing reference, transcreation over literal translation, plus evidence of research into Brazilian app marketing copy.",
+      "files": []
+    }
+  ]
+}

@@ -13,6 +13,7 @@ The repo layout mirrors `~/.claude/skills/` exactly: one folder per skill, each 
 | [nextcloud-web-app](nextcloud-web-app/SKILL.md) | Adding a Nextcloud app target to a local-first web app and publishing it to the Nextcloud App Store. Pairs with standalone-web-app. |
 | [standalone-web-app](standalone-web-app/SKILL.md) | Bootstrapping a local-first, single-bundle browser app (pnpm + Vite + React + TS). |
 | [ticket](ticket/SKILL.md) | Working a Jira ticket end-to-end via Atlassian MCP: plan, branch, implement, commit, PR. Invoke as `/ticket ABC-123`. |
+| [translate](translate/SKILL.md) | Translating documents. Researches native target-language material in the same domain and register first, builds a style guide and lexicon, confirms region and dialect strength. |
 
 ## Install
 
