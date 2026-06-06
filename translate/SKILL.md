@@ -52,6 +52,7 @@ Only now read the full source material closely. Translate informed by the style 
 
 - Match the **tone** of native domain writing, not the surface structure of the source. Reorder, split, or merge sentences where the target language demands it.
 - Apply the lexicon consistently. If a new term appears mid-translation, resolve it against the research (search again if needed) and add it to the lexicon.
+- Localize real-world referents (prices, sizes, cultural anchors) to target-market equivalents, not just converted units. A "$80/month gym membership" becomes what a gym actually costs in the target market, not a literal currency swap. Flag substantive substitutions like price points to the user.
 - Keep proper nouns, brand names, and code untranslated unless convention says otherwise.
 - Preserve the source's document structure (headings, lists, links) unless target-language convention differs.
 
