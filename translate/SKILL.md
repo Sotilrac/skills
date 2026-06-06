@@ -5,70 +5,76 @@ description: Translate documents with research-backed style. Before translating,
 
 # translate
 
-Translate source material into a target language by first researching how native speakers actually write in that domain today, then translating against that evidence. Never translate cold from training knowledge alone: word choice, tone, and conventions drift, and direct translation reads as foreign.
+Research how native speakers write in the domain today, then translate against that evidence.
 
-## Step 1: Scope the job
+## Craft principles
 
-Establish before any research:
+- **Translate context and effect, not words.** Word-for-word produces translatorese; a translation is an interpretation.
+- **Inhabit the voice.** Read the source whole before translating anything.
+- **Purpose governs method.** Different audiences and uses yield different valid translations.
+- **Commit to interpretations.** One deliberate choice, never hedging or in-text alternatives.
+- **Draft, then chisel.** A fast complete draft plus revision passes beats sentence-by-sentence perfectionism.
+- **The ear will not accept what the eye will.** Hunt unnatural rhythm by rereading as if aloud.
 
-- **Source and target languages.** If the target is unstated, ask.
-- **Domain.** Recipes, legal contracts, marketing copy, API docs, fiction, etc.
-- **Register.** Formal, casual, technical, literary, promotional. Infer from the source, confirm if ambiguous.
-- **Target region and dialect strength.** Always ask, in one question, two things:
-  1. Which region? (e.g. Spanish: Spain, Mexico, Rioplatense, neutral Latin American; Portuguese: Brazil vs Portugal; French: France vs Quebec)
-  2. How strongly to lean into the regional dialect? Offer a scale: neutral/international (widely understood, region-correct grammar only), moderate (regional vocabulary where natural), or strong (idioms, colloquialisms, local flavor).
-- **Audience and purpose.** Who reads this and why. A recipe blog and a culinary textbook translate the same dish differently.
+## Step 1: Scope
 
-Use AskUserQuestion for region and dialect strength. Do not guess these.
+- **Source and target languages.** Ask if unstated.
+- **Domain and register.** Infer from the source, confirm if ambiguous.
+- **Region and dialect strength.** Always ask both (AskUserQuestion, one question): which region, and how regional: neutral/international, moderate (regional vocabulary where natural), or strong (idioms, local flavor).
+- **Audience and purpose.**
+- **Text type sets the strategy**: informative → clarity and complete content; expressive → preserve voice and form; operative (ads, CTAs) → transcreate the effect. If the text needs to *work*, translate; if it needs to *win someone over*, transcreate.
+
+Read the source whole: register voice, rhythm, motifs, jokes.
 
 ## Step 2: Research the target language domain
 
-Before reading the source in depth, gather reference material written natively in the target language, in the same domain and register. This is the core of the skill: the goal is to write like a native author in that space, not to transpose the source.
+Gather material written natively in the target language, same domain and register. Search for:
 
-Search the web (and any reference material the user provides) for:
+1. **Domain texts** (e.g. Spanish recipe sites: instruction verb form, units, regional ingredient names).
+2. **Register-matched samples.** A casual blog needs casual-blog references, not encyclopedia entries.
+3. **Current usage.** How contemporary writers handle loanwords and new terminology; what stays untranslated.
+4. **Regional conventions.** Vocabulary, second-person forms, date/number/currency formats.
 
-1. **Domain texts in the target language.** E.g. translating recipes to Spanish: find popular Spanish-language recipe sites, note how they phrase instructions (infinitive vs imperative vs impersonal se), measurement units, ingredient names by region (e.g. "papa" vs "patata").
-2. **Register-matched samples.** Material at the same formality level as the source. A casual blog post needs casual-blog references, not encyclopedia entries.
-3. **Current usage.** Recent material, not just canonical references. Check how contemporary writers handle loanwords, anglicisms, and new terminology in the domain. Note what is borrowed untranslated vs localized.
-4. **Regional conventions.** If a specific region was chosen, prefer sources from that region. Note region-specific vocabulary, second-person forms (tú/usted/vos/vosotros), date and number formats, currency.
+Read 3-6 representative sources; more for long or specialized material.
 
-Fetch and read 3-6 representative sources. More for long or specialized material, fewer for short casual pieces.
+## Step 3: Style guide and lexicon
 
-## Step 3: Build the style guide and lexicon
+Write it out (style.md for long jobs, inline for short ones):
 
-Distill the research into a working document before translating. Write it out (as a file for long jobs, inline for short ones) so it is checkable:
+- **Tone notes.** How native authors address the reader, rhythm, directness, humor.
+- **Grammar conventions.** Instruction verb forms, person and formality, passive vs active norms.
+- **Lexicon.** Source term → chosen target term, rejected alternatives and why, do-not-translate list.
+- **Formatting.** Units, numbers, dates, quotes, capitalization rules.
+- **Regional dial.** Restate region and dialect strength.
 
-- **Tone notes.** How native domain authors address the reader, sentence rhythm, level of directness, humor conventions.
-- **Grammar conventions.** Verb forms for instructions, person and formality, passive vs active norms in this domain.
-- **Lexicon.** A table of domain terms: source term, chosen target term, rejected alternatives and why (wrong region, dated, wrong register). Include terms that stay untranslated.
-- **Formatting conventions.** Units, numbers, dates, quotation marks, capitalization rules of the target language (e.g. Spanish does not capitalize months or title-case headings).
-- **Regional dial.** Restate the chosen region and dialect strength so every word choice is checked against it.
+## Step 4: Translate
 
-For recurring clients or domains, suggest saving the style guide so future translations reuse it.
+Read the source closely, then draft the whole translation:
 
-## Step 4: Read the source, then translate
+- Match the tone of native domain writing. Reorder, split, merge freely.
+- Apply the lexicon consistently; resolve new terms against the research and add them.
+- Keep recurring words and motifs consistent; an author's repetitions are structural.
+- Localize real-world referents (prices, sizes, cultural anchors) to target-market equivalents. Flag substantive substitutions to the user.
+- Proper nouns, brands, code stay untranslated unless convention says otherwise.
+- Solve grammatical asymmetries (gender, T/V, plurality) unobtrusively.
 
-Only now read the full source material closely. Translate informed by the style guide:
+When literal rendering fails, escalate: transposition (change word class) → modulation (shift viewpoint: "not difficult" → "easy") → idiomatic reformulation (target's own idiom, never element-by-element) → cultural substitution → borrow plus one-time gloss → compensation (recreate a lost pun or register marker nearby; preserve the laugh, not the joke).
 
-- Match the **tone** of native domain writing, not the surface structure of the source. Reorder, split, or merge sentences where the target language demands it.
-- Apply the lexicon consistently. If a new term appears mid-translation, resolve it against the research (search again if needed) and add it to the lexicon.
-- Localize real-world referents (prices, sizes, cultural anchors) to target-market equivalents, not just converted units. A "$80/month gym membership" becomes what a gym actually costs in the target market, not a literal currency swap. Flag substantive substitutions like price points to the user.
-- Keep proper nouns, brand names, and code untranslated unless convention says otherwise.
-- Preserve the source's document structure (headings, lists, links) unless target-language convention differs.
+Resist flattening: translations drift toward over-explicitness and cliché. Leave implicit what the source leaves implicit; keep idiosyncratic phrasing idiosyncratic.
 
-## Step 5: Review pass
+## Step 5: Two review passes
 
-Reread the translation as a standalone target-language text:
+Each catches what the other misses:
 
-- Does it read like it was written by a native author in this domain and region, at this dialect strength?
-- Any calques (literal phrasings that mirror source syntax)? Rewrite them.
-- Lexicon and formality consistent throughout?
-- Spot-check 2-3 tricky terms against the research.
+1. **Bilingual accuracy**, target vs source segment by segment: addition, omission, mistranslation, untranslated text; numbers/dates/units locale-formatted; lexicon and do-not-translate respected.
+2. **Monolingual fluency**, translation alone, ear over eye: reads native for this domain, region, dialect strength; calques rewritten; register consistent; spot-check 2-3 tricky terms against the research.
 
-Deliver the translation. On request, also deliver the style guide and lexicon.
+Meaning errors outrank cosmetic ones: fix accuracy first, polish second.
+
+Deliver the translation, style guide w/ lexicon.
 
 ## Operating notes
 
-- Research is not optional. Skipping straight to translation is the failure mode this skill exists to prevent. Only for trivial single phrases may research be skipped.
-- When the source contains errors or ambiguity, flag them to the user rather than silently fixing or guessing.
-- For very long documents, translate in sections and keep the lexicon updated between sections.
+- Research is mandatory. Exception: trivial single phrases.
+- Flag source errors or ambiguity to the user instead of silently fixing.
+- For long documents, translate in sections, keeping the lexicon updated between them.
