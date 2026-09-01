@@ -70,7 +70,33 @@ INLINE = re.compile(r"`[^`]*`")
 
 HASH = ("#", ("sh", "bash", "py", "yaml", "yml", "toml", "conf", "cfg", "ini", "mk", "rb", "pl"))
 SLASH = ("//", ("ts", "tsx", "js", "jsx", "c", "h", "cpp", "hpp", "go", "rs", "java", "swift", "kt"))
-PROSE_EXT = ("md", "markdown", "txt", "rst", "adoc", "")
+PROSE_EXT = ("md", "markdown", "txt", "rst", "adoc")
+
+SHEBANG = {"python": "py", "sh": "sh", "bash": "sh", "zsh": "sh", "perl": "pl",
+           "ruby": "rb", "node": "js"}
+
+
+def kind(path, text):
+    """The extension to treat this file as.
+
+    A repository of executables has no extensions on them: `scripts/nas-status`
+    and `scripts/test-nas-app` are Python, and reading their extension gives "".
+    That used to fall through to the prose branch, so every line of code in them
+    was scanned as English and their scores were inflated by roughly a factor of
+    two. The shebang is the answer the file already carries.
+    """
+    base = os.path.basename(path)
+    if "." in base:
+        return base.rsplit(".", 1)[-1].lower()
+    if path == "-":
+        return "md"
+    first = text.split("\n", 1)[0]
+    if first.startswith("#!"):
+        for name, ext in SHEBANG.items():
+            if name in first:
+                return ext
+        return "sh"                      # a shebang naming something else is still a script
+    return ""                            # no extension and no shebang: read it as prose
 
 
 def prose_lines(path, text):
@@ -79,10 +105,10 @@ def prose_lines(path, text):
     A generator over lines rather than one blob, so a hit can be reported at the
     line it is on: an edit pass wants somewhere to go, not a count.
     """
-    ext = path.rsplit(".", 1)[-1].lower() if "." in os.path.basename(path) else ""
+    ext = kind(path, text)
     lines = text.split("\n")
 
-    if ext in PROSE_EXT or path == "-":
+    if ext in PROSE_EXT or ext == "":
         fenced = False
         for i, line in enumerate(lines, 1):
             if FENCE.match(line):
@@ -161,7 +187,7 @@ def scan(path, text, table):
     """(words counted, vocabulary hits, trope hits)."""
     hits, words = [], 0
     lines = list(prose_lines(path, text))
-    if path.endswith(".py"):
+    if kind(path, text) == "py":
         lines += list(docstrings(text))
     tropes = structural(lines)
     for lineno, line in lines:

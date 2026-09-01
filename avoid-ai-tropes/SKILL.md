@@ -127,7 +127,7 @@ Draft, then reread against the catalogue and cut. Any one pattern once is fine; 
 tell is several together, or one repeated. Vary sentence length, be specific, name
 sources.
 
-Three failure modes to avoid:
+Four failure modes to avoid:
 
 **Swapping one tell for another.** `carries` to `holds`, `plainly` to `clearly`,
 an em dash to a colon in the same dramatic position. Rewrite the sentence, or delete
@@ -136,6 +136,13 @@ the word.
 **Editing towards the score.** A file at 1.0 per 1,000 that no longer means what it
 meant has been edited into nonsense. The scanner finds candidates; whether each one
 goes is a judgement about that sentence.
+
+**Renaming house vocabulary.** A flagged word that names one thing consistently
+across a codebase is a term, not a tell. If `half` is what a repository calls each
+file of a two-file registry, in the docs and in the program's own output, then
+rewriting it in one comment leaves the prose and the code using different words for
+the same thing. Check with `git grep` before renaming, and prefer leaving the hit and
+saying why.
 
 **Trusting the scanner on what it cannot see.** It finds 19 of the 48 tropes. Stacked
 premises, reasoning leak, one-point dilution, superficial analysis, synonym cycling

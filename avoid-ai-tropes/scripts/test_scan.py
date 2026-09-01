@@ -227,6 +227,25 @@ def the_two_halves_can_be_asked_for_separately():
     assert "negative parallelism" in only_tropes and "lift " not in only_tropes, only_tropes
 
 
+@case
+def an_extensionless_script_is_read_by_its_shebang():
+    # a repository of executables has no extensions on them, and reading these as
+    # prose scanned every line of code as English and roughly doubled their scores
+    py = run("collector", '#!/usr/bin/env python3\n"""Plainly the premise."""\n'
+                          'nobody = compute(plainly)\n')
+    assert "premise" in py, py
+    assert "nobody" not in py, py
+    sh = run("deploy", "#!/bin/bash\n# quietly, a comment\necho \"plainly\"\n")
+    assert "quietly" in sh, sh
+    assert "plainly" not in sh, sh
+
+
+@case
+def a_file_with_no_extension_and_no_shebang_is_still_read_as_prose():
+    out = run("NOTES", "the unit plainly refuses to start\n")
+    assert "plainly" in out, out
+
+
 def main():
     bad = 0
     for fn in CASES:
