@@ -24,7 +24,7 @@ import sys
 from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from tropes import structural  # noqa: E402
+from tropes import blank_code, structural  # noqa: E402
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 WORDS = os.path.join(HERE, os.pardir, "words.tsv")
@@ -190,13 +190,15 @@ def scan(path, text, table):
     if kind(path, text) == "py":
         lines += list(docstrings(text))
     tropes = structural(lines)
+    # code and links out, across the whole document rather than per line: a code
+    # span wraps with the prose around it, and stripping line by line left both
+    # halves of a wrapped span to be read as English
+    lines = blank_code(lines)
     for lineno, line in lines:
-        # inline code comes out here rather than in `prose_lines`, because the trope
-        # checks above need the line as written: stripping `make dev` from the front
-        # of a line left it starting with spaces, which read as an indented
-        # continuation, which split the paragraph and reported its tail as a punchy
-        # fragment. The vocabulary lookup is the only half that wants code gone.
-        line = URL_RE.sub(" ", INLINE.sub(" ", line).lower())
+        # the shape checks in `structural` above ran on the lines as written, since
+        # stripping `make dev` from the front of a line left it starting with spaces
+        # and reading as an indented continuation
+        line = line.lower()
         for w in WORD_RE.findall(line):
             w = w.strip("_/").rstrip("-")
             if not w:

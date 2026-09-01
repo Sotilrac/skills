@@ -9,6 +9,7 @@ Each entry is (trope, pattern, what to do). The trope name matches a heading in
 `tropes.md` so a hit can be looked up.
 """
 
+import bisect
 import re
 
 # ------------------------------------------------------------------ phrases
@@ -191,8 +192,31 @@ def paragraphs(lines):
         buf.append(stripped)
 
 
-INLINE_CODE = re.compile(r"`[^`]*`")
+INLINE_CODE = re.compile(r"`[^`]*`", re.S)
 URL = re.compile(r"https?://[^\s<>\"'`)\]}]+")
+
+
+def _pad(m):
+    """Blank a match, keeping its length and any newlines inside it."""
+    return "".join("\n" if c == "\n" else " " for c in m.group(0))
+
+
+def blank_code(lines):
+    """`lines` with inline code spans and links blanked out, same shape.
+
+    Done across the joined text rather than line by line, because prose wraps and
+    a code span wraps with it. Per line, `` `zfs load-key tank && zfs `` and
+    `` mount -a` `` each hold one backtick, so neither matched, and the contents
+    were read as English: the same paragraph scored 148 hits per 1,000 words with
+    the span split over two lines and 42 with it on one. `refused` and `carries`
+    inside a command were being counted as register.
+
+    Length and newlines are preserved so an offset still maps to its own line.
+    """
+    joined = "\n".join(text for _, text in lines)
+    joined = INLINE_CODE.sub(_pad, URL.sub(_pad, joined))
+    out = joined.split("\n")
+    return list(zip([n for n, _ in lines], out))
 
 
 def structural(lines):
@@ -238,15 +262,32 @@ def structural(lines):
     # that on any document with a heading ending in a negation. A dot is what those
     # patterns stop at.
     def hide(line):
-        line = URL.sub(lambda m: " " * len(m.group(0)), line)
-        line = INLINE_CODE.sub(lambda m: " " * len(m.group(0)), line)
+        # code and links are already gone; a heading is dot-filled so no phrase
+        # pattern can build a sentence out of a heading plus the text under it
         return "." * len(line) if HEADING.match(line) else line
 
-    blank = "\n".join(hide(line) for _, line in lines)
-    first = lines[0][0] if lines else 1
+    # A match's offset has to come back as the line it is really on. Counting
+    # newlines works only where every line was handed over, which is true of
+    # markdown and false of source: `prose_lines` yields a source file's comment
+    # lines and skips its code, so the lines are sparse and the nth newline in the
+    # joined text is not the nth line of the file. Every trope reported in a .py or
+    # .ts file pointed at the wrong line. So the real numbers are carried alongside
+    # and an offset is looked up in them.
+    hidden = [hide(line) for _, line in blank_code(lines)]
+    numbers = [n for n, _ in lines]
+    blank = "\n".join(hidden)
+    starts, at = [], 0
+    for h in hidden:
+        starts.append(at)
+        at += len(h) + 1
+
+    def line_of(offset):
+        i = bisect.bisect_right(starts, offset) - 1
+        return numbers[i] if 0 <= i < len(numbers) else (numbers[0] if numbers else 1)
+
     for name, rx, note in PHRASE_RE:
         for m in rx.finditer(blank):
-            lineno = blank.count("\n", 0, m.start()) + first
+            lineno = line_of(m.start())
             out.append((lineno, name, " ".join(m.group(0).split())[:44], note))
 
     out.sort(key=lambda h: (h[0], h[1]))

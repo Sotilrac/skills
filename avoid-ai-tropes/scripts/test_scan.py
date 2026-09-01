@@ -48,6 +48,25 @@ def markdown_skips_inline_code():
 
 
 @case
+def a_code_span_wrapped_across_lines_is_still_code():
+    # prose wraps and a code span wraps with it, so stripping line by line left
+    # `` `zfs ... && zfs `` and `` mount -a` `` each holding one backtick, neither
+    # matching, and the command read as English
+    wrapped = run("a.md", "somebody runs `zfs load-key tank && zfs\n"
+                          "mount -a` and the log says `grep -i refused carries\n"
+                          "nothing` afterwards.\n")
+    for w in ("refused", "carries", "nothing", "load-key"):
+        assert w not in wrapped, (w, wrapped)
+    assert "somebody" in wrapped, wrapped
+
+
+@case
+def a_url_wrapped_across_lines_is_still_a_url():
+    out = run("a.md", "see https://example.com/plainly/quietly/genuinely\nfor more\n")
+    assert "plainly" not in out and "quietly" not in out, out
+
+
+@case
 def markdown_reads_ordinary_prose():
     out = run("a.md", "the unit plainly refuses to start\n")
     assert "plainly" in out and "refuses" in out, out
@@ -158,6 +177,17 @@ def negative_parallelism_catches_the_spelled_out_and_contracted_forms():
                  "The real issue isn't technical. The real issue is organizational.\n",
                  "They're not slow, they're broken.\n"):
         assert "negative parallelism" in run("a.md", text), text
+
+
+@case
+def a_trope_in_a_source_file_reports_its_real_line():
+    # comment lines are sparse in a source file, so counting newlines in the joined
+    # comments gave the nth comment rather than the nth line, and every trope
+    # reported in a .py or .ts file pointed somewhere else
+    src = ["const a = 1;"] * 40 + ["// it is not a bug. It is a feature."]
+    out = run("a.ts", "\n".join(src) + "\n")
+    assert "negative parallelism" in out, out
+    assert ":41" in out.replace("  ", " ").replace(" 41 ", ":41"), out
 
 
 @case
