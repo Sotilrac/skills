@@ -1,0 +1,49 @@
+{
+  "skill_name": "avoid-ai-tropes",
+  "evals": [
+    {
+      "id": 0,
+      "eval_name": "clean-up-a-saturated-draft",
+      "prompt": "Can you clean up this blog post draft? It reads like ChatGPT wrote it and I need to publish it under my own name on Monday. Keep every technical claim, I just want it to sound like a person. Save it as post-clean.md.\n\n# Why We Moved Our Build Cache To S3\n\nOur build times weren't just slow. They were a symptom of something deeper.\n\nThree constraints shape any caching decision.\n\nIt's worth noting that our CI runners are ephemeral, which means every job started from a cold cache. The build cache lived on the runner's local disk and vanished when the runner did. Nobody had questioned this. The setup quietly carried an assumption that predates our move to spot instances, and that assumption was load-bearing.\n\nLet's break this down.\n\nThe first constraint is cost. Spot instances are cheap \u2014 genuinely cheap \u2014 but they get reclaimed. The second is correctness: a cache that serves a stale artifact is worse than no cache at all. The third is latency.\n\nWe evaluated three options. Local disk. A shared NFS mount. Object storage.\n\nNFS seemed appealing at first. But NFS on spot instances is a chokepoint: every runner asserts a lock, and the lock server becomes a single point of failure. The asymmetry between read and write traffic is what settles it \u2014 we read the cache 40x more than we write it.\n\nS3 serves as the durable layer. Bazel's remote cache protocol speaks to it directly through a small shim. Cache hits went from 12% to 89%. Median build time fell from 14 minutes to 3.\n\nHere's the kicker: the storage bill is $40 a month.\n\nUltimately, the lesson isn't about S3. It's about questioning the defaults you inherited.",
+      "expected_output": "post-clean.md with every technical claim intact (ephemeral runners, spot reclamation, NFS lock server, 40x read/write ratio, 12% to 89% hit rate, 14 to 3 minutes, $40/month) and the tells removed: no negative parallelism, no em-dash pauses, no 'it's worth noting', no 'let's break this down', no 'here's the kicker', no 'serves as', no signposted conclusion, no compulsive counting, and the vocabulary words (symptom, quietly, carries, load-bearing, asserts, asymmetry, settles, worse, nobody, genuinely, chokepoint) gone or replaced with plain equivalents.",
+      "files": [],
+      "assertions": [
+        "produced post-clean.md",
+        "kept every technical fact: ephemeral runners, spot reclamation, NFS lock server, 40x read/write ratio, 12% to 89% hit rate, 14 to 3 minutes, $40 a month",
+        "did not gut the text (>= 180 words)",
+        "vocabulary density under 6.0 per 1,000 words",
+        "trope density under 3.0 per 1,000 words",
+        "no 'worth noting', 'break this down', 'here's the kicker', 'serves as', signposted conclusion, negative parallelism or em dash survives"
+      ]
+    },
+    {
+      "id": 1,
+      "eval_name": "write-a-readme-from-scratch",
+      "prompt": "I just finished a little CLI tool called `portcheck`. It reads a docker-compose.yml, works out every host port the stack will bind, and tells you which ones are already in use on the machine before you run `docker compose up`. It handles the long and short port syntax, `expose` (which it ignores, since that's container-internal), profiles (only ports in active profiles count), and env var interpolation from .env. It exits 1 if there's a conflict so you can put it in a pre-up hook. Written in Go, single binary, no deps. Can you write the README for it? Save as README.md.",
+      "expected_output": "README.md covering what the tool does, install, usage, the exit code, and the four parsing cases (long/short syntax, expose ignored, profiles, .env interpolation) - written without the register: no negative parallelism, no bold-first bullet lists, no title case headings, no em dashes as pauses, no promotional adjectives (seamless, robust, blazing fast, comprehensive), no counting preamble, and low vocabulary-cluster density.",
+      "files": [],
+      "assertions": [
+        "produced README.md",
+        "covers expose, profiles, .env interpolation, the exit code and Go",
+        "did not stub it out (>= 120 words)",
+        "vocabulary density under 6.0 per 1,000 words",
+        "trope density under 3.0 per 1,000 words",
+        "no promotional adjective, named phrase or em dash survives"
+      ]
+    },
+    {
+      "id": 2,
+      "eval_name": "pr-description-for-a-real-diff",
+      "prompt": "write me a PR description for this change. it's going on a repo where the reviewers are pretty allergic to AI-sounding writing so keep it flat and factual. save it to pr.md\n\n```diff\n--- a/collector/mail.py\n+++ b/collector/mail.py\n@@ -12,7 +12,7 @@ MAIL_LOG = \"/var/log/msmtp.log\"\n-def read_mail(now):\n-    lines = open(MAIL_LOG).readlines()\n+MAIL_LOG_GLOB = \"/var/log/msmtp.log*\"\n+BLIND_GRACE_DAYS = 15\n+\n+def read_mail(now):\n+    lines = read_all_generations(MAIL_LOG_GLOB)\n     last_ok = None\n     failures = 0\n     for line in lines:\n@@ -25,8 +28,14 @@ def read_mail(now):\n-    if last_ok is None:\n-        return WARN, \"no delivered mail in the log\"\n-    return level(last_ok), None\n+    if last_ok is not None:\n+        return level(last_ok), None\n+    rotated = days_since_rotation(MAIL_LOG_GLOB)\n+    if rotated is None or rotated < BLIND_GRACE_DAYS:\n+        return OK, None\n+    return WARN, f\"no delivered mail since the log rotated {rotated} days ago\"\n```\n\nbackground: the alerting subsystem is built so that silence means everything is fine, and the dashboard grades how long it has been since the last successful alert email. threshold is warn at 40 days. logrotate keeps 4 weekly generations. the old code read only the current log file, so for most of every month right after rotation there were zero lines in it, which it reported as a warning. it had actually sent mail three days earlier.",
+      "expected_output": "pr.md stating the bug (only the current log generation was read, so a rotation produced a false warning), the fix (read all generations; when there is no delivered mail at all, wait 15 days from the rotation before warning), and the reasoning about absence of evidence. Flat and factual: no negative parallelism, no em-dash pauses, no 'worth noting', no signposted conclusion, and low vocabulary-cluster density despite the subject matter inviting it.",
+      "assertions": [
+        "produced pr.md",
+        "states the rotation cause, the 15-day grace and the 40-day threshold, and that all generations are now read",
+        "is a real description (>= 80 words)",
+        "vocabulary density under 6.0 per 1,000 words",
+        "trope density under 3.0 per 1,000 words",
+        "no named phrase, negative parallelism or em dash survives"
+      ]
+    }
+  ]
+}

@@ -8,6 +8,7 @@ The repo layout mirrors `~/.claude/skills/` exactly: one folder per skill, each 
 
 | Skill | When it triggers |
 | :--- | :--- |
+| [avoid-ai-tropes](avoid-ai-tropes/SKILL.md) | Writing or editing prose, docs, commit bodies, PR descriptions or comments. Two catalogues of what marks text as AI-written, sentence patterns and vocabulary, plus a scanner that scores a file against hand-written prose. |
 | [d2-diagrams](d2-diagrams/SKILL.md) | Writing, debugging, or explaining [D2](https://d2lang.com) diagrams. Auto-loads on `**/*.d2`. |
 | [html-deck](html-deck/SKILL.md) | Authoring single-file HTML presentation decks (keyboard nav, auto-scale, print-to-PDF, speaker notes). Ships with a runtime, a template, and a worked example. |
 | [nextcloud-web-app](nextcloud-web-app/SKILL.md) | Adding a Nextcloud app target to a local-first web app and publishing it to the Nextcloud App Store. Pairs with standalone-web-app. |
