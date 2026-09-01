@@ -149,6 +149,35 @@ def negative_parallelism_is_found():
 
 
 @case
+def negative_parallelism_catches_the_spelled_out_and_contracted_forms():
+    # `it's not X, it's Y` is the catalogue's headline example of this trope, and
+    # the pattern used to require an `-n't`, so it was silent on that form and on
+    # `is not` written out
+    for text in ("It's not bold. It's backwards.\n",
+                 "This is not a bug. It is a feature.\n",
+                 "The real issue isn't technical. The real issue is organizational.\n",
+                 "They're not slow, they're broken.\n"):
+        assert "negative parallelism" in run("a.md", text), text
+
+
+@case
+def a_phrase_pattern_does_not_cross_a_heading():
+    # `## What the list is not` above a paragraph opening `It measures ...` read as
+    # one negative-parallelism sentence
+    out = run("a.md", "## What the list is not\n\nIt measures register, not authorship.\n")
+    assert "negative parallelism" not in out, out
+
+
+@case
+def negative_parallelism_leaves_ordinary_negations_alone():
+    # a plain negative statement followed by a consequence is not the trope
+    for text in ("The pool is not mounted and cannot be read.\n",
+                 "The passphrase is not stored here, and the Tang server never sees it.\n",
+                 "Samba is not running, so the share is unreachable.\n"):
+        assert "negative parallelism" not in run("a.md", text), text
+
+
+@case
 def negative_parallelism_does_not_fire_on_an_ordinary_negation():
     out = run("a.md", "The unit isn't started at boot, so the pool stays locked.\n")
     assert "negative parallelism" not in out, out

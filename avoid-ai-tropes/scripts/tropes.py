@@ -17,9 +17,24 @@ import re
 # of these are only tells when capitalised, because that is where a sentence starts.
 PHRASES = [
     ("negative parallelism",
-     # "X isn't A. It's B", "The question isn't A, the question is B"
-     r"\b(?:is|was|are|were|does|do|did)n[’']?t\s+[^.;!?]{3,70}[.;,]\s+"
-     r"(?:it|this|that|the\s+\w+)(?:[’']s|\s+(?:is|was|are|were))\b",
+     # "It's not A. It's B", "This is not A. It is B", "The question isn't A, the
+     # question is B", "They're not A, they're B".
+     #
+     # The negation has three spellings and the pattern needs all of them. It used
+     # to require the `-n't` contraction, which missed both `is not` written out and
+     # `it's not` -- and `it's not X, it's Y` is the catalogue's own headline example
+     # of this trope, so the check was silent on the most common form of the thing it
+     # was for.
+     # no `don't` / `doesn't`: an imperative is not this trope, and
+     # "Don't use viewport units; the canvas is fixed" is instruction prose that
+     # matched every part of the shape. The forms this trope actually takes are the
+     # copulas.
+     r"(?:(?:is|was|are|were)(?:n[’']?t|\s+not)|[’'](?:s|re|m)\s+not)"
+     r"\s+[^.;!?]{3,70}[.;,]\s+"
+     # the echoed subject may be a noun phrase rather than a pronoun, so allow a few
+     # words: "The real issue isn't technical. The real issue is organizational."
+     r"(?:it|this|that|they|we|the\s+\w+(?:\s+\w+){0,2})"
+     r"(?:[’'](?:s|re)|\s+(?:is|was|are|were))\b",
      "say what the thing is, without the setup"),
     ("negative parallelism",
      r"\bnot\s+(?:just|only|merely|simply)\s+[^.;!?]{3,50}[.;,]\s*(?:but|it[’']s)\b",
@@ -213,10 +228,21 @@ def structural(lines):
                         "join it to the paragraph it belongs to"))
 
     # blanked to the same length rather than removed, so an offset in this text is
-    # still an offset in the original and the line number stays right
-    blank = "\n".join(INLINE_CODE.sub(lambda m: " " * len(m.group(0)),
-                                      URL.sub(lambda m: " " * len(m.group(0)), line))
-                      for _, line in lines)
+    # still an offset in the original and the line number stays right.
+    #
+    # A heading is filled with dots rather than blanked, for the same reason and one
+    # more: the gap in a phrase pattern may cross a line, because prose wraps, but it
+    # must not cross a heading. `## What the list is not` sitting above a paragraph
+    # that opens `It measures ...` read as one negative-parallelism sentence, and a
+    # check that invents a sentence out of a heading plus the text under it will do
+    # that on any document with a heading ending in a negation. A dot is what those
+    # patterns stop at.
+    def hide(line):
+        line = URL.sub(lambda m: " " * len(m.group(0)), line)
+        line = INLINE_CODE.sub(lambda m: " " * len(m.group(0)), line)
+        return "." * len(line) if HEADING.match(line) else line
+
+    blank = "\n".join(hide(line) for _, line in lines)
     first = lines[0][0] if lines else 1
     for name, rx, note in PHRASE_RE:
         for m in rx.finditer(blank):
