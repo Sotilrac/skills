@@ -40,7 +40,7 @@ Also check the source material for anything that is a number series, a compariso
    cp ${CLAUDE_SKILL_DIR}/template/build.mjs .
    node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs fonts "Instrument Serif:400,400i" "IBM Plex Sans:400,600" > fonts.json   # only if not using system stacks
    ```
-4. **Write the generator, not the JSON.** Edit `build.mjs`: define the palette, the type presets and the layout helpers first (the chassis), then instantiate each slide against them. Hand-writing element JSON for a dozen slides means a thousand lines of repeated fields and drifting styles; a generator keeps every `h2` identical and every id deterministic. For a two-slide edit to an existing deck, editing the extracted JSON directly is fine.
+4. **Write the generator, not the JSON.** A fresh document omits `docId` and `collab`; the app mints both on first open. Edit `build.mjs`: define the palette, the type presets and the layout helpers first (the chassis), then instantiate each slide against them. Hand-writing element JSON for a dozen slides means a thousand lines of repeated fields and drifting styles; a generator keeps every `h2` identical and every id deterministic. For a two-slide edit to an existing deck, editing the extracted JSON directly is fine.
 5. **Build, splice, check.**
    ```bash
    node build.mjs > doc.json
@@ -48,7 +48,7 @@ Also check the source material for anything that is a number series, a compariso
    node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs check "My Deck.bento.html" --shots shots/
    ```
    `splice` lints offline (required fields, ids, links, asset refs, margins). `check` runs the real `window.bento.validate()` (text overflow, unknown keys, unrenderable chart options, fonts not embedded) and writes one PNG per slide. Look at every screenshot. Overflowing text, a title that wrapped to three lines, two elements crowding each other: none of it shows in JSON, all of it shows on screen. Fix and repeat until the deck is clean.
-6. **Hand over.** The user opens the file in a browser: it boots into the editor with the deck loaded. `#present` on the URL starts the show. PDF export and speaker view are in the app.
+6. **Hand over.** The user opens the file in a browser (`xdg-open`, `open`, `start`): it boots into the editor with the deck loaded. `#present` on the URL starts the show. PDF export and speaker view are in the app. For an audience copy that opens straight into the show with no editor, make a player file: `bento.mjs player deck.bento.html handout.bento.html` sets `readonly: true` and strips any collab keys. `template: true` is the other file mode: every open mints a fresh deck, for a distributable starter rather than a personal deck.
 
 ## Editing an existing deck
 
@@ -57,6 +57,8 @@ node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs extract deck.bento.html > doc.json
 # edit doc.json (or regenerate it), then
 node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs splice deck.bento.html doc.json
 ```
+
+Without a shell (a chat session), the round trip goes through the app: the user copies the JSON out with Save, Copy document JSON, you return a full replacement document, and they paste it back with Save, Replace from JSON (undoable). In the browser console `window.bento.doc` reads and `window.bento.loadDoc(json)` writes.
 
 - **Look at `collab` before reading further.** If the document has a `collab` key with `ownerPriv`, `writerPriv` or `invite`, the file contains live-session credentials, and anyone who gets the file or its JSON can join and write. Tell the user before continuing; they may not know the deck is shared. A read-only copy (Save menu, Save read-only copy) has no keys in it. `extract` prints a warning when it sees them.
 - **Never regenerate `docId`.** It is the document's identity. Fresh decks omit it and the app mints one.

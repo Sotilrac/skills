@@ -16,6 +16,8 @@ const usage = `usage:
   bento.mjs extract <deck.bento.html>            print the document JSON (stdout)
   bento.mjs splice <deck.bento.html> <doc.json>  lint doc.json and write it into the deck
   bento.mjs lint <doc.json>                      offline lint only
+  bento.mjs player <deck.bento.html> <out.bento.html>
+                                                 write a read-only player copy (boots into the show, collab keys stripped)
   bento.mjs fonts "Family:400,600,400i" [...]    print {assets, fonts} with embedded Google Fonts woff2
   bento.mjs check <deck.bento.html> [--shots dir] [--chrome path]
                                                  run window.bento.validate() and screenshot every slide`
@@ -345,6 +347,18 @@ async function check(file, shotsDir, chromePath) {
       const next = html.replace(BLOCK, (_, a, __, c) => a + escapeForBlock(JSON.stringify(doc)) + c)
       writeFileSync(file, next)
       console.error(`spliced ${docFile} into ${file} (${doc.slides.length} slides)`)
+      break
+    }
+    case 'player': {
+      const [file, out] = args
+      if (!file || !out) die(usage)
+      const { html, json } = readBlock(file)
+      if (!json) die('the #bento-doc block is empty; splice a document first')
+      const doc = JSON.parse(json)
+      delete doc.collab
+      doc.readonly = true
+      writeFileSync(out, html.replace(BLOCK, (_, a, __, c) => a + escapeForBlock(JSON.stringify(doc)) + c))
+      console.error(`wrote ${out}: readonly player, collab stripped`)
       break
     }
     case 'fonts': {
