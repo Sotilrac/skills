@@ -1,0 +1,47 @@
+{
+  "skill_name": "html-deck",
+  "evals": [
+    {
+      "id": 0,
+      "name": "from-scratch-with-data",
+      "prompt": "I need a short deck for Thursday's leadership sync, as a bento slides file (bento.page). Topic: the migration of our ingest pipeline from the old batch jobs to the streaming service. Feel: technical, calm, editorial. Palette: deep green almost black background (#0E1A14), off-white text (#EDE9DF), one accent in warm yellow (#F2B233). Type: a serif display face with a utilitarian sans for body, your pick. Content: (1) a cover; (2) why we did it: nightly batch took 6h and failed roughly one night in five, streaming gives us sub-minute freshness; (3) the numbers: p95 freshness went 6h \u2192 40s, failed runs/month went 6 \u2192 0, infra cost went $18.4k \u2192 $11.2k/month, on-call pages went 14 \u2192 3 per month; (4) a before/after comparison of batch vs streaming on: freshness, failure handling, cost, replay ability, ops burden; (5) what's left: backfill tooling, the two legacy consumers still on batch, retiring the old cluster by end of Q4; (6) a closing ask: approve retiring the batch cluster. Put speaker notes on each slide, I'll talk from them. Save it as Ingest_Migration.bento.html in the output folder.",
+      "expected_output": "A self-contained Ingest_Migration.bento.html with a valid bento/slides document: cover, a chart for the before/after numbers (not text), a table for the comparison, morph or stable-id chrome, speaker notes on every slide, the given palette, embedded or system fonts, no text overflow. Plus evidence the author rendered and inspected the slides.",
+      "files": [],
+      "assertions": [
+        "Ingest_Migration.bento.html exists and its #bento-doc block parses as a bento/slides doc with 6+ slides",
+        "The before/after numbers get a numeric treatment (a chart with plain-number series, or stat elements with count-up), not body text",
+        "The batch-vs-streaming comparison is a table element",
+        "At least one slide uses transition morph and shares an element id with the previous slide",
+        "Every slide has non-empty speaker notes",
+        "Palette honoured: theme.background #0E1A14 and theme.accent #F2B233",
+        "At most two font families across text elements (a third only if monospace)",
+        "Every non-system font family is embedded in doc.fonts",
+        "No thin accent rule sitting directly under a title (generated-slide hallmark)",
+        "Runtime validate() reports no errors and no text-overflow warnings",
+        "Per-slide screenshots exist in the outputs (evidence the deck was rendered and inspected)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "edit-existing-deck",
+      "prompt": "Here's my deck 'Platform Review.bento.html' (it's a bento slides file). Add two slides before the closing number slide: one with a bar chart of monthly active workspaces for Jan\u2013Jun (1,240 / 1,310 / 1,480 / 1,620 / 1,910 / 2,260) and one three-column slide titled 'What drove it' with columns: 'SSO launch' (enterprise trials doubled after the March SSO release), 'Template gallery' (new workspaces created from a template went from 12% to 41%), 'Faster imports' (median import time fell from 9 min to 40 s). Match the existing look exactly, keep the speaker notes style, don't touch the other slides. Save the result over the same file in the output folder.",
+      "expected_output": "The same file with 5 slides: the original 3 in place and unchanged, a chart slide with plain-number bar data, a three-column slide built from the deck's existing presets (same fonts, colors, eyebrow/title positions). docId unchanged, notes on the new slides, validate clean, and no overflow.",
+      "files": [
+        "Platform Review.bento.html"
+      ],
+      "assertions": [
+        "The file still parses as a bento/slides document",
+        "docId unchanged",
+        "Exactly 5 slides, with the two new ones inserted before the closing number slide",
+        "The original three slides are unchanged (deep-equal to the input)",
+        "A bar chart element carries the six monthly values as plain numbers",
+        "New slides reuse the deck's existing font stacks and colours",
+        "The three-column slide follows the existing eyebrow (y 72) + title (y 104) layout at x 96",
+        "Three column heads sit at the band's 3-column x positions (96, 470, 844)",
+        "The two new slides have speaker notes",
+        "Runtime validate() reports no errors and no text-overflow warnings",
+        "Screenshots of the result exist in the outputs (evidence it was rendered and inspected)"
+      ]
+    }
+  ]
+}

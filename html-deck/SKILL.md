@@ -1,155 +1,139 @@
 ---
 name: html-deck
-description: Build self-contained HTML presentation decks with the <deck-stage> web component. Handles keyboard nav, auto-scale to viewport, one-page-per-slide print to PDF, speaker notes, and localStorage resume. Use when authoring slide presentations in HTML instead of PPTX, Keynote, or Google Slides.
+description: Build slide decks as single-file Bento presentations (.bento.html, https://bento.page). The deck is plain JSON inside the file, so you author the document, splice it in with the bundled script, and the file includes its own viewer, editor, presenter, PDF export and speaker notes. Use whenever the user wants a presentation, slides, a deck, a talk, a pitch, a keynote, or a slideshow in HTML instead of PPTX, Keynote or Google Slides, or asks to edit an existing .bento.html. Ships a CLI (fetch, extract, splice, fonts, check with real-browser validation and per-slide screenshots), a generator template, and the bento format guide.
 ---
 
-# HTML deck
+# HTML deck (Bento)
 
-Single-file decks built on the `<deck-stage>` custom element shipped with this skill. You author one HTML file; the element handles navigation, scaling, print, and persistence. Output is a portable folder that opens locally, deploys to any static host, and prints cleanly to PDF.
+A deck is one `.bento.html` file. The Bento app (viewer, editor, presenter, PDF export) is the file; the presentation is a JSON document in a single block near the top:
+
+```html
+<script type="application/bento+json" id="bento-doc">{ "format": "bento/slides", ... }</script>
+```
+
+You author that JSON and splice it in. Everything else in the file stays as downloaded. The result opens locally, deploys to any static host, and the recipient needs nothing installed.
 
 ## Files shipped with this skill
 
-- `${CLAUDE_SKILL_DIR}/deck-stage.js` — the runtime. Copy it next to every deck.
-- `${CLAUDE_SKILL_DIR}/template.html` — minimal 3-slide starter. Copy and edit.
-- `${CLAUDE_SKILL_DIR}/references/rollout-guard-example.html` — full-fledged example with production typography and layout patterns. Read this when you need inspiration for a serious deck.
+- `${CLAUDE_SKILL_DIR}/scripts/bento.mjs`: the CLI. `fetch` downloads the app, `extract` pulls the JSON out of a deck, `splice` writes it back with the right escaping and an offline lint, `fonts` embeds Google Fonts as woff2 assets, `check` opens the deck in headless Chromium, runs the runtime validator and screenshots every slide.
+- `${CLAUDE_SKILL_DIR}/template/build.mjs`: a generator starter. Presets for type and color, layout helpers with the column arithmetic done, three slides. Copy it into the deck folder and edit.
+- `${CLAUDE_SKILL_DIR}/references/bento-agents.md`: the bento/slides format guide (element types, fx, morph, charts, tables, states, layout arithmetic, gotchas). Read it once before authoring; refer back for exact field names. The live copy is https://bento.page/agents.md.
 
 ## Inputs to ask for before authoring
 
-This skill does not invent aesthetics. Before writing any slide, get three things from the user (ask if any are missing — a guessed aesthetic reads as generic):
+This skill does not invent aesthetics. A guessed aesthetic reads as generic, so get three things from the user first (ask if any are missing):
 
-- **Feel / register.** One sentence: technical, editorial, corporate, minimalist, playful, academic, etc.
+- **Feel / register.** One sentence: technical, editorial, corporate, minimalist, playful, academic.
 - **Color palette.** Explicit hex values or a description concrete enough to translate ("dark, warm, one amber accent"). One dominant color at 60–70% visual weight, one or two supporting tones, one sharp accent.
 - **Typography direction.** Serif or sans, display or utilitarian. If the user has no opinion, pick one pairing and commit.
 
+Also check the source material for anything that is a number series, a comparison grid, a process, or a photo. Each of those maps to a specific bento feature (see "Map material to features").
+
 ## Workflow
 
-1. **Draft in markdown first.** One section per slide. Annotate structure and emphasis inline (e.g. `[cover]`, `[3-col]`, `[dark]`, `[pull-quote]`, `**key phrase**`). Do not write HTML yet.
-2. **Review the markdown as a deck.** Spot commonalities: five "title + three columns" slides share a layout; two "big quote + attribution" slides do too. Note which slides deserve a contrasting background for emphasis, and keep that list short.
-3. **Translate to HTML.** Build the shared chassis first (palette, type scale, chrome, common layouts as CSS classes). Then instantiate each slide against those classes. Do not author slides in isolation.
-4. **Preview and iterate.** See "Preview and export" below.
+1. **Draft in markdown first.** One section per slide. Annotate structure and emphasis inline (`[cover]`, `[3-col]`, `[dark]`, `[chart: revenue by year]`, `[table]`, `[morph from prev]`, `**key phrase**`). No JSON yet.
+2. **Review the markdown as a deck.** Spot commonalities: five "title + three columns" slides share a layout; two "big quote + attribution" slides do too. Note which slides deserve a contrasting background, and keep that list short. Note where consecutive slides show the same thing changing: those are morph candidates.
+3. **Set up the folder.**
+   ```bash
+   mkdir my-deck && cd my-deck
+   node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs fetch "My Deck.bento.html"
+   cp ${CLAUDE_SKILL_DIR}/template/build.mjs .
+   node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs fonts "Instrument Serif:400,400i" "IBM Plex Sans:400,600" > fonts.json   # only if not using system stacks
+   ```
+4. **Write the generator, not the JSON.** Edit `build.mjs`: define the palette, the type presets and the layout helpers first (the chassis), then instantiate each slide against them. Hand-writing element JSON for a dozen slides means a thousand lines of repeated fields and drifting styles; a generator keeps every `h2` identical and every id deterministic. For a two-slide edit to an existing deck, editing the extracted JSON directly is fine.
+5. **Build, splice, check.**
+   ```bash
+   node build.mjs > doc.json
+   node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs splice "My Deck.bento.html" doc.json
+   node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs check "My Deck.bento.html" --shots shots/
+   ```
+   `splice` lints offline (required fields, ids, links, asset refs, margins). `check` runs the real `window.bento.validate()` (text overflow, unknown keys, unrenderable chart options, fonts not embedded) and writes one PNG per slide. Look at every screenshot. Overflowing text, a title that wrapped to three lines, two elements crowding each other: none of it shows in JSON, all of it shows on screen. Fix and repeat until the deck is clean.
+6. **Hand over.** The user opens the file in a browser: it boots into the editor with the deck loaded. `#present` on the URL starts the show. PDF export and speaker view are in the app.
 
-## Skeleton
+## Editing an existing deck
 
-```html
-<!doctype html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>My deck</title>
-  <script src="deck-stage.js"></script>
-  <style>/* deck styles */</style>
-</head>
-<body>
-  <deck-stage width="1920" height="1080">
-    <section data-label="01 Cover">...</section>
-    <section data-label="02 Intro">...</section>
-  </deck-stage>
-</body>
-</html>
+```bash
+node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs extract deck.bento.html > doc.json
+# edit doc.json (or regenerate it), then
+node ${CLAUDE_SKILL_DIR}/scripts/bento.mjs splice deck.bento.html doc.json
 ```
 
-- **Design size** is set once via `width`/`height` on `<deck-stage>`. Every slide renders at those exact pixel dimensions and scales to fit the window, letterboxed.
-- **Each `<section>` is a slide.** Siblings stack at `inset: 0`; the active slide gets `data-deck-active`. Don't wrap slides in extra containers.
-- **`data-label="NN Title"`** names the slide for speaker notes and comment flow. Use a two-digit prefix so ordering matches numbering.
+- **Look at `collab` before reading further.** If the document has a `collab` key with `ownerPriv`, `writerPriv` or `invite`, the file contains live-session credentials, and anyone who gets the file or its JSON can join and write. Tell the user before continuing; they may not know the deck is shared. A read-only copy (Save menu, Save read-only copy) has no keys in it. `extract` prints a warning when it sees them.
+- **Never regenerate `docId`.** It is the document's identity. Fresh decks omit it and the app mints one.
+- Read `doc.size` and `doc.theme` and reuse existing element ids where the content is the same, so edits morph instead of popping.
 
-## Authoring rules (runtime mechanics)
+## Canvas and type scale
 
-- **Position is absolute inside the canvas.** The component sets `position: absolute; inset: 0` on every `<section>`. Your slide layout uses normal flow inside that fixed-size box.
-- **Use absolute pixel values** matching the design size (e.g. `padding: 96px 120px`, `font-size: 72px` at 1920×1080). Don't use viewport units; the canvas is scaled, not responsive.
-- **Safe type scale at 1920×1080:** 26–30px body, 56–72px section titles, 112–220px display/cover.
-- **Non-active slides stay in the DOM.** State (videos, iframes, inputs, React trees) is preserved across navigation.
-- **Set `text-wrap: balance`** on titles so line breaks look intentional.
+Canonical canvas is 1280×720 with 96px side margins, so the content band is x 96–1184 (1088 wide). The arithmetic is done:
+
+| Split | Width | x positions | Gutter |
+|---|---|---|---|
+| 2 columns | 528 | 96, 656 | 32 |
+| 3 columns | 340 | 96, 470, 844 | 34 |
+| 4 columns | 254 | 96, 374, 652, 930 | 24 |
+| 60 / 40 | 624 / 432 | 96, 752 | 32 |
+
+Title band `y:72 h:84`, content from `y:208`, bottom margin 96 leaves 416px of content height.
+
+Safe type scale at 1280×720: 18–22px body, 40–56px section titles, 76–140px display and cover. Positions are absolute pixels; the height of a text box is not knowable from the JSON, so size generously and let `check` report overflow, or call `window.bento.measure({html, w, fontSize, lineHeight})` in the open deck's console for the exact height.
+
+## Map material to features
+
+The format's value is that content types have dedicated elements. Bullets on every slide waste it.
+
+| Material | Use |
+|---|---|
+| Numbers to compare (trend, magnitude, share) | `chart` element: bar, line, pie, scatter. Bar and line series data are plain numbers; color by series; template formatters only. |
+| Comparison, spec, pricing, feature grid | `table` element with column weights and one `style` object. Not for trends. |
+| Consecutive slides where the same thing changes | Morph: same element `id` (or `morphId`) on both slides, `transition: "morph"` on the later one. Position, size and color tween. |
+| A detail to drill into on request | State slide: `stateOf: "<parent-id>"` plus an element `link`. Arrow keys skip it; ← returns to the parent. |
+| Appendix or backup material | `hidden: true`. Skipped in the show and PDF, reachable by `link`. |
+| A headline number | Big text plus `fx: { countUp: true }`. |
+| Full-bleed photo | Image at 0,0,1280,720 with `fit: "cover"`, a scrim rect, text on top. Optional slow ken-burns. |
+| Sequence, flow, timeline | Line or `path` shapes, connectors with `from`/`to`, or morph a highlight through the steps. |
+| Code | `code` element (content, fontSize, fontFamily, color). |
+| Slide numbers, title, date, author | Tokens in text: `{{page}}`, `{{pages}}`, `{{title}}`, `{{author}}` from `doc.meta`. Never type these facts by hand. `{{date}}` is the day the file is opened, so type a meeting date literally. |
+
+Motion is signal, like color. Morph where the same thing carries across slides, one ambient moment on the cover, count-up on the one number that matters. When everything moves, none of it reads as emphasis.
 
 ## Consistency discipline
 
-- **Shared styling in global CSS, not inline.** Every `<em>`, `<strong>`, `<h2>`, `.eyebrow`, `.stat`, `.footnote` should render identically across slides. Use class names. If you've pasted the same `style="..."` twice, extract it. Inline styles reserved for genuine one-offs.
+- **Presets, not per-element styling.** Every title, body block, eyebrow, stat and footnote comes from one helper in the generator. If two elements share a purpose they share a helper; if you have typed the same `fontSize`/`color`/`lineHeight` twice by hand, extract it.
+- **Same shape, same layout helper.** Four three-column slides use one `threeCol()` call each, not four hand-laid grids. Differences live in the content.
+- **Stable ids for chrome.** Deck title, section label, page number: give them the same id on every slide so they morph in place instead of blinking. Slide ids `s01`, `s02`, ... and element ids `s03-title`, `s03-body` for slide-local content; `chrome-page`, `chrome-title` for the shared furniture.
 - **Variation is signal, not decoration.** A light background in a mostly-dark deck means "this slide is different and important" (section divider, key stat, call to action). If every slide has a unique background, none of them do.
-- **Don't hardcode the same fact twice.** Hardcoding a slide number (`03/12`) per slide is fine — the work happens once, at authoring time. What's not fine is duplicating that number elsewhere (top chrome *and* footer, page title *and* slide title, etc.). A fact that appears in two places has to be changed in two places when the deck shifts.
-- **Minimize repeated chrome.** Deck title, section name, page number: pick one and apply it through a shared class, or omit it. Cramming brand + section + page + date onto every slide is clutter. Prefer clean; the runtime already handles counting.
-- **Same shape → same layout class.** Four three-column slides should use one layout class, not four hand-laid grids. Differences between them live in the content, not the structure.
+- **Minimize repeated chrome.** Deck title, section name, page number: pick one, or omit. Cramming brand + section + page + date onto every slide is clutter.
+- **Speaker notes on every slide.** `notes` is a required field and doubles as the talk track. Write the beat the slide lands, not a description of the slide.
+- **Set `role`** (`title`, `subtitle`, `body`, `kicker`) on text elements so the editor's layouts can restyle the deck later without retyping.
 
 ## Design guardrails
 
 Universal rules that apply to any deck, regardless of feel:
 
-- **Colors that fit this topic.** A palette that would also work for a dentist and a crypto pitch means you haven't chosen specifically enough.
-- **One dominant color, one accent.** Never give three or more colors equal weight.
+- **Colors that fit this topic.** A palette that would also work for a dentist and a crypto pitch is not chosen specifically enough. Don't default to blue.
+- **One dominant color, one accent.** Never give three or more colors equal weight. `theme.accent` seeds the chart palette, so choose it with the charts in mind.
 - **Left-align body text.** Center only titles and cover slides.
-- **Every slide needs a visual anchor.** Text-only slides are forgettable. A stat, an icon, a chart, a framed quote, a pulled phrase — something.
-- **Strong size contrast on titles.** 72px+ titles over 26–32px body. When they're close in size, the hierarchy collapses.
-- **Never an accent line under a title.** It's a hallmark of AI-generated slide filler. Use whitespace or a background shift instead.
-- **Don't default to blue.** Pick colors that fit the topic.
-- **Commit to one motif.** A repeated element (rule color, shape, chrome pattern) carried across every slide, not scattered.
-- **Breathing room.** 96–120px side margins at 1920×1080. Don't fill every pixel.
+- **Every slide needs a visual anchor.** A stat, a chart, a framed quote, a pulled phrase, a shape carrying the accent. Text-only slides are forgettable.
+- **Strong size contrast on titles.** 48px+ titles over 18–22px body. When they're close in size, the hierarchy collapses.
+- **Never an accent line under a title.** It's a hallmark of generated slide filler. Use whitespace or a background shift instead.
+- **Commit to one motif.** A repeated element (rule color, shape, chrome pattern) on every slide, not scattered.
+- **Breathing room.** Keep the 96px margins. Don't fill every pixel.
+- **Contrast.** Shapes and text must read against the slide background they sit on, including scrims over photos.
 
 ## Assets
 
-- **Fonts: Google Fonts.** Link from `fonts.googleapis.com` in the `<head>`. Limit to 2–3 families total (display, body, mono). The example deck pairs Instrument Serif + IBM Plex Sans + JetBrains Mono.
-- **Icons: FontAwesome, inlined as SVG.** Don't link the full FontAwesome bundle; it ships icons you won't use and adds a network dep to the exported HTML. Grab each icon's raw SVG from the FontAwesome site and either paste it at the use site or, when the icon recurs, put it in a `<symbol>` sprite at the top of `<body>`:
+- **Fonts are embedded in the file or fall back silently.** A `fontFamily` naming a face the document doesn't embed falls back to the next entry in the stack, with no warning, and it looks right on your machine because you have the font. Either embed (`bento.mjs fonts` produces `assets` + `fonts` entries; the template merges `fonts.json`) or name a system stack and mean it. Always write a full stack: `"'Fraunces', Georgia, serif"`. Two families max, three with a mono for code.
+- **Images** as data URIs in `doc.assets`, referenced `"asset:<key>"`. The file must stay self-contained. Keep photos under a few hundred KB each (resize before embedding).
+- **Icons: FontAwesome, inlined as SVG.** Paste the icon's raw SVG into a `svg` element's `markup`, or put recurring icons in `doc.assets` and reference them with `asset`. Set `fill` explicitly in the markup. One FontAwesome variant per deck (solid, regular, light); mixing weights reads as sloppy. Size the element to the local type scale.
+- **Glyph coverage.** Google Fonts latin subsets omit arrows and many symbols, so "→" in an embedded face falls back to a system font mid-line. Write the word, or draw the arrow as a `line` shape with `lineEnd: "arrow"`.
+- **Video and audio** as `media` elements. Embed only short clips as data URIs; link big files by URL with a poster. Autoplay runs only in present mode and needs `muted: true`.
 
-  ```html
-  <svg style="display:none" aria-hidden="true">
-    <symbol id="i-check" viewBox="0 0 512 512"><path d="..."/></symbol>
-    <symbol id="i-alert" viewBox="0 0 512 512"><path d="..."/></symbol>
-  </svg>
-  <!-- elsewhere -->
-  <svg class="icon"><use href="#i-check"/></svg>
-  ```
+## Checks before handing over
 
-- **One icon style per deck.** Pick one FontAwesome variant (solid, regular, light, thin, duotone) and stay in it. Mixing weights reads as sloppy.
-- **Size icons to the local type scale.** An icon next to 30px body text sits around 30px; an icon in a 22px eyebrow sits around 22px. Use a shared `.icon` class with `width: 1em; height: 1em; fill: currentColor` and let surrounding font-size set the size.
-
-## Speaker notes
-
-Optional. Include a JSON script with one entry per slide:
-
-```html
-<script type="application/json" id="speaker-notes">
-[
-  { "title": "Cover", "notes": "Open with the frame." },
-  { "title": "Intro", "notes": "Land the why-now beat first." }
-]
-</script>
-```
-
-The component dispatches a `slidechange` event and posts `{slideIndexChanged: N}` to the parent window, so any notes renderer can wire into either.
-
-## Controls (built-in)
-
-- ← / → / PgUp / PgDn / Space — prev / next
-- Home / End — first / last
-- 1–9 — jump to slide N (0 → slide 10)
-- R — reset to first slide
-- Mobile: tap the left third to go back, right third to go forward
-
-## Preview and export
-
-```bash
-# Preview (any static server works)
-python3 -m http.server 8000
-# or: npx serve .
-
-# Export to PDF
-# Open the deck in browser, File → Print → Save as PDF.
-# The component injects @page rules sized to your design dimensions,
-# so output is one slide per page with no margins.
-```
-
-For PPTX export, capture each slide with Playwright at authored size and set the `noscale` attribute on `<deck-stage>` so the captured DOM is unscaled.
-
-Bootstrap a new deck by making a folder, copying `${CLAUDE_SKILL_DIR}/deck-stage.js` and `${CLAUDE_SKILL_DIR}/template.html` into it, then editing the template.
-
-## Programmatic API
-
-```js
-const deck = document.querySelector('deck-stage');
-deck.goTo(3); deck.next(); deck.prev(); deck.reset();
-deck.index;   // current 0-based index
-deck.length;  // total slide count
-
-deck.addEventListener('slidechange', (e) => {
-  // e.detail.index, previousIndex, total, slide, previousSlide, reason
-});
-```
-
-Full component documentation is in the header comment of `deck-stage.js`.
+- [ ] Every screenshot from `check` looked at, no overflow or crowding, `validate()` clean above `info`.
+- [ ] Numbers that should be a chart are a chart; grids that should be a table are a table.
+- [ ] Consecutive slides about one subject share ids and `transition: "morph"`.
+- [ ] One accent, two typefaces, 96px margins, right-most x ≤ 1184.
+- [ ] Fonts embedded or a system stack named on purpose.
+- [ ] Speaker notes on every slide.
+- [ ] No `collab` keys in a file that is about to be sent around.
